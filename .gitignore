@@ -72,3 +72,22 @@ Temporary Items
 # Ignore all local history of files
 .history
 .ionide
+
+### Project specific ###
+# Build output
+dbxignore
+dist/
+build/
+
+# Test directories
+test-dir/
+
+# Coverage files
+coverage.html
+
+# IDE
+.idea/
+
+# Temporary files
+*.tmp
+*.log
