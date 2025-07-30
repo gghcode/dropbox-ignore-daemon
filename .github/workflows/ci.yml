@@ -33,6 +33,11 @@ jobs:
     - name: Download dependencies
       run: go mod download
     
+    - name: Set up test environment
+      run: |
+        mkdir -p "$HOME/tmp"
+        echo "TMPDIR=$HOME/tmp" >> "$GITHUB_ENV"
+    
     - name: Run tests
       run: go test -race -v ./...
     

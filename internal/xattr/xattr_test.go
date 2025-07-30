@@ -1,10 +1,27 @@
 package xattr
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 )
+
+// checkXattrSupport checks if the filesystem supports extended attributes
+// and skips the test if not supported
+func checkXattrSupport(t *testing.T, err error) {
+	if err == nil {
+		return
+	}
+	
+	// Check for common errors indicating xattr is not supported
+	if errors.Is(err, syscall.EPERM) || 
+	   errors.Is(err, syscall.EOPNOTSUPP) ||
+	   errors.Is(err, syscall.ENOTSUP) {
+		t.Skip("Filesystem does not support extended attributes")
+	}
+}
 
 func TestSetGetRemoveIgnored(t *testing.T) {
 	// Create a temporary directory for testing
@@ -26,7 +43,9 @@ func TestSetGetRemoveIgnored(t *testing.T) {
 	}
 	
 	// Test SetIgnored
-	if err := SetIgnored(testFile); err != nil {
+	err = SetIgnored(testFile)
+	checkXattrSupport(t, err)
+	if err != nil {
 		t.Fatalf("SetIgnored failed: %v", err)
 	}
 	
@@ -65,7 +84,9 @@ func TestIgnoredDirectory(t *testing.T) {
 	}
 	
 	// Test setting ignored on directory
-	if err := SetIgnored(testDir); err != nil {
+	err := SetIgnored(testDir)
+	checkXattrSupport(t, err)
+	if err != nil {
 		t.Fatalf("SetIgnored on directory failed: %v", err)
 	}
 	
@@ -108,7 +129,9 @@ func TestSymbolicLinks(t *testing.T) {
 	}
 	
 	// Test setting ignored on symlink
-	if err := SetIgnored(linkFile); err != nil {
+	err := SetIgnored(linkFile)
+	checkXattrSupport(t, err)
+	if err != nil {
 		t.Fatalf("SetIgnored on symlink failed: %v", err)
 	}
 	
@@ -143,7 +166,9 @@ func TestSymbolicLinks(t *testing.T) {
 	}
 	
 	// Set ignored on directory symlink
-	if err := SetIgnored(linkDir); err != nil {
+	err = SetIgnored(linkDir)
+	checkXattrSupport(t, err)
+	if err != nil {
 		t.Fatalf("SetIgnored on directory symlink failed: %v", err)
 	}
 	
