@@ -45,7 +45,7 @@ jobs:
       run: go vet ./...
     
     - name: Build
-      run: go build -trimpath -ldflags "-s -w" -o dbxignore cmd/dbxignore/main.go
+      run: go build -trimpath -ldflags "-s -w" -o dbxignore ./cmd/dbxignore
     
     - name: Test binary
       run: ./dbxignore --version
