@@ -23,7 +23,26 @@ func checkXattrSupport(t *testing.T, err error) {
 	}
 }
 
+// testXattrSupport tests if xattr is supported on the filesystem
+// and skips the test if not
+func testXattrSupport(t *testing.T) {
+	tmpFile := filepath.Join(t.TempDir(), "xattr-test")
+	if err := os.WriteFile(tmpFile, []byte("test"), 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	
+	// Try to set an xattr to check support
+	err := SetIgnored(tmpFile)
+	if err != nil && (errors.Is(err, syscall.EPERM) ||
+		errors.Is(err, syscall.EOPNOTSUPP) ||
+		errors.Is(err, syscall.ENOTSUP)) {
+		t.Skip("Filesystem does not support extended attributes")
+	}
+}
+
 func TestSetGetRemoveIgnored(t *testing.T) {
+	testXattrSupport(t)
+	
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
@@ -74,6 +93,8 @@ func TestSetGetRemoveIgnored(t *testing.T) {
 }
 
 func TestIgnoredDirectory(t *testing.T) {
+	testXattrSupport(t)
+	
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	testDir := filepath.Join(tmpDir, "testdir")
@@ -101,6 +122,8 @@ func TestIgnoredDirectory(t *testing.T) {
 }
 
 func TestRemoveNonExistentAttribute(t *testing.T) {
+	testXattrSupport(t)
+	
 	// Create a temporary file
 	tmpFile := filepath.Join(t.TempDir(), "test.txt")
 	if err := os.WriteFile(tmpFile, []byte("test"), 0644); err != nil {
@@ -114,6 +137,8 @@ func TestRemoveNonExistentAttribute(t *testing.T) {
 }
 
 func TestSymbolicLinks(t *testing.T) {
+	testXattrSupport(t)
+	
 	tmpDir := t.TempDir()
 	
 	// Create a real file
